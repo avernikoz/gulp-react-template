@@ -2,47 +2,56 @@ let exampleCategories = [
     {
         id: 1,
         parent: null,
-        name: 'Category 1'
+        name: 'Category 1',
+        numberOfTasks: 2
     },
     {
         id: 2,
         parent: null,
-        name: 'Category 2'
+        name: 'Category 2',
+        numberOfTasks: 3
     },
     {
         id: 3,
         parent: null,
-        name: 'Category 3'
+        name: 'Category 3',
+        numberOfTasks: 5
     },
     {
         id: 123213,
         parent: 3,
-        name: 'Category 12323'
+        name: 'Category 12323',
+        numberOfTasks: null
     },
     {
         id: 9932,
         parent: 3,
-        name: 'Category 39932'
+        name: 'Category 39932',
+        numberOfTasks: null
     },
     {
         id: 842,
         parent: 3,
-        name: 'Category 842'
+        name: 'Category 842',
+        numberOfTasks: null
     },
     {
         id: 66,
         parent: 842,
-        name: 'Category 68'
+        name: 'Category 68',
+        numberOfTasks: null
     },
     {
         id: 68,
         parent: 842,
-        name: 'Category 69'
+        name: 'Category 69',
+        numberOfTasks: null
     },
     {
         id: 111,
         parent: 68,
-        name: 'Category 001'
+        name: 'Category 001',
+        numberOfTasks: null
     },
 ];
 

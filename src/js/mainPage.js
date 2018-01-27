@@ -13,6 +13,12 @@ React.createClass = createReactClass;
 
 import {exampleCategories, exampleTasks} from './defaultValues';
 import Navbar from './Navbar';
+import ModalWindowCategoryAdd from './ModalWindowCategoryAdd';
+import ModalWindowCategoryEdit from './ModalWindowCategoryEdit';
+import ModalWindowCategoryDelete from './ModalWindowCategoryDelete';
+
+
+
 
 
 let ToDoListApp = React.createClass({
@@ -24,6 +30,7 @@ let ToDoListApp = React.createClass({
             selectedCategoryText: '',
             selectedTaskId: '',
             selectedTaskText: '',
+            numberOfAllTasks: null,
             filter: {
                 filterText: '',
                 showCompletedTasks: false
@@ -118,7 +125,8 @@ let ToDoListApp = React.createClass({
         let newCategory = {
             id: Date.now(),
             name: categoryName,
-            parent: null
+            parent: null,
+            numberOfTasks: null
         };
 
         let allCategories = this.state.categories;
@@ -130,7 +138,8 @@ let ToDoListApp = React.createClass({
         let newNestedCategory = {
             id: Date.now(),
             name: categoryName,
-            parent: parentCategoryId
+            parent: parentCategoryId,
+            numberOfTasks: null
         };
 
         let allCategories = this.state.categories;
@@ -216,7 +225,27 @@ let ToDoListApp = React.createClass({
         let allTasks = this.state.tasks;
         allTasks.unshift(newTask);
 
-        this.setState({tasks: allTasks});
+        this.setState({tasks: allTasks},this.countTasksInCategory);
+    },
+    countTasksInCategory: function () {
+        let allCategories = this.state.categories;
+
+        let categoryIndex = allCategories.findIndex((elem) => {
+            return elem.id === this.state.selectedCategoryId
+        });
+
+        allCategories[categoryIndex].numberOfTasks = allCategories[categoryIndex].numberOfTasks + 1;
+
+
+        this.setState({categories: allCategories},this.countAllTasks);
+
+    },
+    countAllTasks: function () {
+
+        let currentTaskCount = this.state.numberOfAllTasks;
+
+        this.setState({numberOfAllTasks: currentTaskCount + 1});
+
     },
     editTaskDescription: function (taskId,taskDesc) {
         let allTasks = this.state.tasks;
@@ -474,153 +503,11 @@ let Task = React.createClass({
 });
 
 
-let ModalWindowCategoryAdd = React.createClass({
-    getInitialState: function () {
-        return ({inputText: ''});
-    },
-    componentDidUpdate() {
-        this.nameInput.focus();
-    },
-    inputChangeHandler: function (event) {
-        this.setState({inputText: event.target.value});
-    },
-    addCategoryHandler: function () {
-        this.props.addNestedCategory(this.state.inputText, this.props.selectedCategoryId);
-
-        this.clearTextInput();
-        this.closeCurrentModal();
-    },
-    _handleKeyPress: function (e) {
-        if (e.key === 'Enter') {
-            this.addCategoryHandler();
-        }
-    },
-    clearTextInput: function () {
-        this.setState({inputText: ''});
-    },
-    closeCurrentModal: function () {
-        this.clearTextInput();
-        this.props.closeModal('addCategory');
-    },
-    render: function () {
-        let modalWindowWrapperClassName = (this.props.modalWindowOpened && this.props.modalWindowAddOpened) ? 'modal-window-wrapper' : 'modal-window-wrapper disabled';
-        let addButtonCondition = this.state.inputText === '';
-
-        return (
-            <div className={modalWindowWrapperClassName}>
-                <div className="modal-window">
-                    <div className="modal-buttons-container">
-                        <input className="category-add-input"
-                               type="text" placeholder="Enter new subcategory title..."
-                               value={this.state.inputText}
-                               onChange={this.inputChangeHandler} onKeyPress={this._handleKeyPress}
-                               ref={(input) => {
-                                   this.nameInput = input;
-                               }}
-                        />
-                        <input className="add-button" type="button" value="Add" onClick={this.addCategoryHandler}
-                               disabled={addButtonCondition}/>
-                        <input className="close-button" type="button" value="Close" onClick={this.closeCurrentModal}/>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-});
-
-let ModalWindowCategoryEdit = React.createClass({
-    getInitialState: function () {
-        return ({categoryEditedText: this.props.selectedCategoryText});
-    },
-    componentDidUpdate() {
-        this.nameInput.focus();
-    },
-    // componentWillReceiveProps: function (nextProps) {
-    //     this.setState({
-    //         categoryEditedText: nextProps.selectedCategoryText
-    //     })
-    // },
-    onChangeCategoryEditedText: function (event) {
-        this.setState({categoryEditedText: event.target.value})
-    },
-    closeCurrentModal: function () {
-        this.clearSearchInput();
-        this.props.closeModal('editCategory');
-    },
-    saveCategoryChangesHandler: function () {
-        let newCategoryText = this.state.categoryEditedText;
-        this.props.editCategory(this.props.selectedCategoryId, newCategoryText);
-
-        this.clearSearchInput();
-        this.closeCurrentModal();
-    },
-    _handleKeyPress: function (e) {
-        if (e.key === 'Enter') {
-            this.saveCategoryChangesHandler()
-        }
-    },
-    clearSearchInput: function () {
-        this.setState({categoryEditedText: ''});
-    },
-    render: function () {
-        let modalWindowWrapperClassName = (this.props.modalWindowOpened && this.props.modalWindowEditOpened) ? 'modal-window-wrapper' : 'modal-window-wrapper disabled';
-        let saveButtonCondition = this.state.categoryEditedText === '';
-
-        return (
-            <div className={modalWindowWrapperClassName}>
-                <div className="modal-window">
-                    <div className="modal-buttons-container">
-                        <input className="category-add-input" type="text" placeholder={this.props.selectedCategoryText}
-                               value={this.state.categoryEditedText}
-                               onChange={this.onChangeCategoryEditedText} onKeyPress={this._handleKeyPress}
-                               ref={(input) => {
-                                   this.nameInput = input;
-                               }}
-
-                        />
-                        <input className="add-button" type="button" value="Save"
-                               onClick={this.saveCategoryChangesHandler} disabled={saveButtonCondition}/>
-                        <input className="close-button" type="button" value="Close" onClick={this.closeCurrentModal}/>
-
-                    </div>
-                </div>
-            </div>
-        )
-    }
-});
 
 
-let ModalWindowCategoryDelete = React.createClass({
-    getInitialState: function () {
-        return ({categoryName: ''});
-    },
-    deleteCategoryHandler: function () {
-        this.props.deleteCategory(this.props.selectedCategoryId);
 
-        this.closeCurrentModal();
-    },
-    closeCurrentModal: function () {
-        this.props.closeModal('deleteCategory');
-    },
-    render: function () {
-        let modalWindowWrapperClassName = (this.props.modalWindowOpened && this.props.modalWindowDeleteOpened) ? 'modal-window-wrapper' : 'modal-window-wrapper disabled';
 
-        return (
-            <div className={modalWindowWrapperClassName}>
-                <div className="modal-window">
-                    <div className="modal-buttons-container">
-                        <div className="category-delete-text-container">Delete
-                            category {this.props.selectedCategoryText} and all nested?
-                        </div>
-                        <input className="add-button" type="button" value="Delete"
-                               onClick={this.deleteCategoryHandler}/>
-                        <input className="close-button" type="button" value="Close" onClick={this.closeCurrentModal}/>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-});
+
 
 
 let ModalWindowEditTaskDescription = React.createClass({
